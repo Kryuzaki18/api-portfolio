@@ -1,0 +1,1 @@
+module.exports.usersSeeder = require('./users.seeder');
