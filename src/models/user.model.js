@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 
-const toJSON = require("../utils/toJSON");
+const transformSchema = require("../utils/toJSON");
 const { roles } = require("../config/roles");
 
 const userSchema = mongoose.Schema(
@@ -54,7 +54,7 @@ const userSchema = mongoose.Schema(
 );
 
 // add plugin that converts mongoose to json
-userSchema.plugin(toJSON);
+userSchema.plugin(transformSchema(userSchema));
 
 /**
  * Check if email is taken

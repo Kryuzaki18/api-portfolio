@@ -1,35 +1,37 @@
-const deleteAtPath = (obj, path, index) => {
-  if (index === path.length - 1) {
-    delete obj[path[index]];
-    return;
-  }
-  deleteAtPath(obj[path[index]], path, index + 1);
-};
+const renameFields = { _id: 'id' } // Rename _id to id
+const removeFields = ['__v']; // Remove __v
+const keepFields = []; // Optionally keep only specific fields
 
-const toJSON = (schema) => {
-  let transform;
-  if (schema.options.toJSON && schema.options.toJSON.transform) {
-    transform = schema.options.toJSON.transform;
-  }
+// Function to dynamically set transformation for any schema
+const transformSchema = (schema) => {
+  schema.set('toJSON', {
+    transform: (doc, ret) => {
 
-  schema.options.toJSON = Object.assign(schema.options.toJSON || {}, {
-    transform(doc, ret, options) {
-      Object.keys(schema.paths).forEach((path) => {
-        if (schema.paths[path].options && schema.paths[path].options.private) {
-          deleteAtPath(ret, path.split('.'), 0);
-        }
+      // Dynamically rename fields as specified
+      Object.keys(renameFields).forEach((oldKey) => {
+        const newKey = renameFields[oldKey];
+        ret[newKey] = ret[oldKey];
+        delete ret[oldKey];
       });
 
-      ret.id = ret._id.toString();
-      delete ret._id;
-      delete ret.__v;
-      delete ret.createdAt;
-      delete ret.updatedAt;
-      if (transform) {
-        return transform(doc, ret, options);
-      }
-    },
-  });
-};
+      // Dynamically remove fields as specified
+      removeFields.forEach((field) => {
+        delete ret[field];
+      });
 
-module.exports = toJSON;
+      // Keep only specified fields (optional)
+      if (keepFields.length > 0) {
+        Object.keys(ret).forEach((key) => {
+          if (!keepFields.includes(key)) {
+            delete ret[key];
+          }
+        });
+      }
+
+      // Return transformed object
+      return ret;
+    }
+  });
+}
+
+module.exports = transformSchema;

@@ -1,15 +1,15 @@
 const express = require("express");
 const helmet = require("helmet");
-const xss = require("xss-clean");
-const mongoSanitize = require("express-mongo-sanitize");
-const compression = require("compression");
 const cors = require("cors");
+const compression = require("compression");
+const mongoSanitize = require("express-mongo-sanitize");
+const { xss } = require('express-xss-sanitizer');
 const httpStatus = require("http-status");
 
 const config = require("./config/env.config");
 const logger = require("./config/winston");
 const routes = require("./routes/v1");
-const { authLimiter } = require("./middlewares/auth-limiter");
+const { limiter } = require("./middlewares/limiter");
 const connectDB = require("./config/connection");
 
 const app = express();
@@ -47,7 +47,7 @@ process.on("unhandledRejection", () => gracefulShutdown());
 // set security HTTP headers
 app.use(helmet());
 
-// parse json request body
+// parse json
 app.use(express.json());
 
 // parse urlencoded request body
@@ -64,21 +64,18 @@ app.use(compression());
 app.use(cors());
 app.options("*", cors());
 
-app.get("/", (req, res) => {
+// apply the rate limiting middleware to all requests.
+app.use(limiter);
+
+// Testing api endpoint
+app.get("/v1", (req, res) => {
   res.send("Hello, world!");
 });
-
-// limit repeated failed requests to auth endpoints
-// if (config.env === 'production') {
-//   app.use('/v1/auth', authLimiter);
-// }
 
 // v1 api routes
 // app.use('/v1', routes);
 
 // send back a 404 error for any unknown api request
-// app.use((req, res, next) => {
-//   next(new Error(httpStatus.NOT_FOUND, 'Not found'));
-// });
-
-module.exports = app;
+ app.use((req, res, next) => {
+   next(new Error(httpStatus.NOT_FOUND, 'Not found'));
+ });
