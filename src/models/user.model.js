@@ -54,7 +54,7 @@ const userSchema = mongoose.Schema(
 );
 
 // add plugin that converts mongoose to json
-userSchema.plugin(transformSchema(userSchema));
+userSchema.plugin(transformSchema);
 
 /**
  * Check if email is taken
