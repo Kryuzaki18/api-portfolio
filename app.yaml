@@ -1,0 +1,19 @@
+runtime: nodejs20
+env: flex
+
+# Entry point for the application, using pm2 to manage the server
+entrypoint: pm2 start ecosystem.config.js --no-daemon
+
+# Environment variables (if any)
+env_variables:
+  NODE_ENV: production
+
+# Automatic scaling configuration
+automatic_scaling:
+  min_num_instances: 1
+  max_num_instances: 3
+
+# Optional, depending on your service (example for HTTP)
+handlers:
+  - url: /.*
+    script: auto
