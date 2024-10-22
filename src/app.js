@@ -78,8 +78,8 @@ app.get("/hello-world", (req, res) => {
 // v1 public routes
 app.use('/v1/public', publicRoutes);
 
-// v1 routess
-// app.use('/v1', routes);
+// v1 routes
+app.use('/v1', routes);
 
 // send back a 404 error for any unknown api request
  app.use((req, res, next) => {
