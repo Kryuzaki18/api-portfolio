@@ -2,14 +2,27 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 
-const transformSchema = require("../utils/toJSON");
 const { roles } = require("../config/roles");
+
+const skillsSchema = mongoose.Schema(
+  {
+    name: String,
+    url: String,
+    rate: Number,
+    order: Number,
+  },
+  { _id: false }
+);
 
 const userSchema = mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
+      trim: true,
+    },
+    contact_number: {
+      type: String,
       trim: true,
     },
     email: {
@@ -24,6 +37,12 @@ const userSchema = mongoose.Schema(
         }
       },
     },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
     password: {
       type: String,
       required: true,
@@ -36,25 +55,19 @@ const userSchema = mongoose.Schema(
           );
         }
       },
-      private: true, // used by the toJSON plugin
     },
     role: {
       type: String,
       enum: roles,
       default: "user",
     },
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
+    skills: [skillsSchema],
   },
   {
+    versionKey: false,
     timestamps: true,
   }
 );
-
-// add plugin that converts mongoose to json
-userSchema.plugin(transformSchema);
 
 /**
  * Check if email is taken

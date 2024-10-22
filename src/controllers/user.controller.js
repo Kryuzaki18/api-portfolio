@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const pick = require('../utils/pick-object');
+const pickObject = require('../utils/pickObject');
 const catchAsync = require('../utils/catchAsync');
 const { userService } = require('../services');
 
@@ -9,8 +9,8 @@ const createUser = catchAsync(async (req, res) => {
 });
 
 const getUsers = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['name', 'role']);
-  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const filter = pickObject(req.query, ['name', 'role']);
+  const options = pickObject(req.query, ['sortBy', 'limit', 'page']);
   const result = await userService.queryUsers(filter, options);
   res.send(result);
 });

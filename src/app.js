@@ -9,6 +9,7 @@ const httpStatus = require("http-status");
 const config = require("./config/env.config");
 const logger = require("./config/winston");
 const routes = require("./routes/v1");
+const publicRoutes = require("./routes/v1/public");
 const { limiter } = require("./middlewares/limiter");
 const connectDB = require("./config/connection");
 
@@ -28,10 +29,12 @@ connectDB()
 // Graceful shutdown
 const gracefulShutdown = () => {
   // Close the server and stop accepting new requests
-  server.close(() => {
-    logger.info("HTTP server closed.");
-    process.exit(0); // Exit process
-  });
+  if (server) {
+    server.close(() => {
+      logger.info("Server closed.");
+      process.exit(0); // Exit process
+    });
+  }
 };
 
 // Handle SIGTERM (e.g., from Kubernetes, Docker, or system termination)
@@ -68,11 +71,14 @@ app.options("*", cors());
 app.use(limiter);
 
 // Testing api endpoint
-app.get("/v1", (req, res) => {
+app.get("/hello-world", (req, res) => {
   res.send("Hello, world!");
 });
 
-// v1 api routes
+// v1 public routes
+app.use('/v1/public', publicRoutes);
+
+// v1 routess
 // app.use('/v1', routes);
 
 // send back a 404 error for any unknown api request
